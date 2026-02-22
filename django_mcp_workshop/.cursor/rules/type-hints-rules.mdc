@@ -1,0 +1,92 @@
+---
+alwaysApply: true
+description: "Strict type hint requirements and MyPy configuration for Python projects with comprehensive type safety guidelines"
+---
+
+# Type Hints Rules
+
+## Purpose
+
+Promote **strict, readable type annotations** so your Python code is easier to understand, refactor, and verify with static checkers (e.g. MyPy, Pyright).
+
+## Core Principles
+
+- Every **function parameter and return value** should be annotated
+- Prefer **concrete types** over `Any` wherever practical
+- Use **modern Python 3.10+ syntax** (`list[str]`, `User | None`) when available
+- Keep type hints **accurate and minimal**, not overly complex
+- Configure strictness in your type checker config (e.g. `pyproject.toml` for MyPy)
+
+## Simple Examples
+
+### Good vs Bad
+
+```python
+# BAD: No hints
+def add(a, b):
+    return a + b
+
+# GOOD: Simple, explicit
+def add(a: int, b: int) -> int:
+    return a + b
+```
+
+```python
+# BAD: Overusing Any
+def parse(data: Any) -> Any:
+    ...
+
+# BETTER: Specific types
+from typing import Mapping, Any
+
+def parse(data: Mapping[str, Any]) -> dict[str, str]:
+    ...
+```
+
+### Optional and Unions
+
+```python
+from typing import Optional
+
+# Using Optional
+def find_user(user_id: str) -> Optional[User]:
+    ...
+
+# Python 3.10+
+def find_user(user_id: str) -> User | None:
+    ...
+```
+
+## Type Ignore Usage
+
+Use `# type: ignore[...]` **only as a last resort**, and always explain why:
+
+```python
+# Third-party library without type hints
+import legacy_lib  # type: ignore[import-untyped]  # No type stubs available
+
+# Complex expression MyPy cannot infer
+value = complex_expression()  # type: ignore[assignment]  # MyPy cannot narrow this union correctly
+```
+
+## Do / Don't
+
+### Do
+
+- **Do** annotate all public functions and methods
+- **Do** keep annotations up to date when refactoring
+- **Do** configure strict rules like `disallow_untyped_defs = true` in your type checker
+- **Do** use simple helper types or `TypedDict`/`dataclass` for repeated shapes
+
+### Don't
+
+- **Don't** rely heavily on `Any` unless absolutely necessary
+- **Don't** sprinkle `# type: ignore` without error codes or reasons
+- **Don't** mix old (`List[str]`) and new (`list[str]`) styles inconsistently
+- **Don't** write extremely complex types when a simpler abstraction would do
+
+## Configuration (High-Level)
+
+- Define type-checker settings in your project config (e.g. `pyproject.toml` or `mypy.ini`)
+- Enable stricter options progressively (e.g. `disallow_untyped_defs`, `warn_return_any`)
+- Run your type checker in CI to keep annotations healthy over time

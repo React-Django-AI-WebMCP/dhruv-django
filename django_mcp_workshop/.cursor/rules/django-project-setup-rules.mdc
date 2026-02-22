@@ -1,0 +1,421 @@
+---
+description: "Django project setup and scaffolding guidelines for production-ready project structure, environment configuration, and initial setup"
+---
+
+# Django Project Setup and Scaffolding Rules
+
+You are an expert in Python, Django, and scalable RESTful API development. This document contains all rules and guidelines for setting up and scaffolding Django projects following the production-ready structure.
+
+## Project Structure
+
+### Root Directory Structure
+
+```
+backend/                     # Project Root (replace 'backend' with your project name)
+│
+├── .env                     # Environment variables (API keys, DB creds) - gitignored
+├── .env.example             # Environment variables template
+├── .gitignore               # Git ignore file
+├── CONTRIBUTING.md          # Contribution guidelines
+├── Dockerfile               # Docker image configuration
+├── docker-compose.yml       # Docker services (Web, DB, Redis)
+├── Makefile                 # Make commands for common tasks
+├── manage.py                # Django command line utility
+├── pyproject.toml            # Python project configuration (Black, isort, etc.)
+├── README.md                # Project documentation
+│
+├── logs/                    # Application logs directory
+│   └── .gitkeep             # Preserve directory in git
+│
+├── requirements/            # Dependencies split by environment
+│   ├── base.txt             # Common requirements (Django, DRF)
+│   ├── local.txt            # Dev requirements (debug-toolbar, testing tools)
+│   └── production.txt       # Prod requirements (gunicorn)
+│
+├── config/                  # Configuration Directory (Main Project Package)
+│   ├── __init__.py
+│   ├── asgi.py              # Async entry point
+│   ├── wsgi.py              # Sync entry point (Gunicorn uses this)
+│   ├── urls.py              # Main URL routing
+│   └── settings/            # Split Settings Pattern
+│       ├── __init__.py
+│       ├── base.py          # Shared settings (Apps, Middleware)
+│       ├── local.py         # Dev settings (Debug=True)
+│       └── production.py    # Prod settings (Debug=False, Security)
+│
+├── core/                    # "Common" App for shared logic
+│   ├── __init__.py
+│   ├── apps.py              # App configuration
+│   ├── exceptions.py        # Custom exception handlers
+│   ├── logging.py           # Logging configuration
+│   ├── middleware.py        # Custom middleware
+│   ├── models.py            # Abstract models (e.g., TimeStampedModel, SoftDeleteModel)
+│   ├── permissions.py       # Base permission classes
+│   ├── responses.py         # Unified API response structure
+│   ├── urls.py              # Health check URLs
+│   ├── utils.py             # Helper functions
+│   └── views.py             # Health check views (HealthCheckView, ReadinessCheckView)
+│
+└── <app_name>/              # Django Apps (at root level)
+    ├── __init__.py
+    ├── admin.py             # Django admin configuration
+    ├── apps.py              # App configuration
+    ├── models.py            # Database Models
+    ├── serializers.py      # DRF Serializers (JSON conversion)
+    ├── services.py          # Business Logic (Service Layer)
+    ├── urls.py              # App-specific URLs
+    ├── views.py             # API Views / ViewSets
+    ├── tests.py             # Tests
+    └── migrations/          # Database migrations
+        └── __init__.py
+```
+
+## Initial Project Setup
+
+### Step 1: Create Django Project
+
+```bash
+django-admin startproject config .
+```
+
+**Note**: Replace `config` with your project name if desired. The configuration directory name should match your project name.
+
+### Step 2: Create Core App
+
+```bash
+python manage.py startapp core
+```
+
+### Step 3: Create New App
+
+```bash
+python manage.py startapp <app_name>
+```
+
+**Example**:
+```bash
+python manage.py startapp calendar
+```
+
+### Step 4: Create Service Layer Files
+
+For each app, create a `services.py` file for business logic:
+
+```bash
+touch <app_name>/services.py
+```
+
+## Environment Configuration
+
+### .env.example Template
+
+Always create a `.env.example` file with all required environment variables:
+
+- `SECRET_KEY`: Django secret key
+- `DEBUG`: Debug mode (True/False)
+- `ALLOWED_HOSTS`: Comma-separated list of allowed hosts
+- Database configuration (DB_ENGINE, DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
+- Redis configuration (REDIS_HOST, REDIS_PORT, REDIS_DB, REDIS_PASSWORD)
+- CORS configuration (CORS_ALLOWED_ORIGINS)
+- JWT configuration (JWT_SECRET_KEY, JWT_ALGORITHM, JWT_ACCESS_TOKEN_LIFETIME, JWT_REFRESH_TOKEN_LIFETIME)
+- Email configuration
+- AWS S3 configuration (if using)
+- Sentry DSN (if using)
+
+### Settings Management
+
+Split settings into multiple files:
+- `base.py`: Common settings for all environments
+- `local.py`: Local/development-specific overrides
+- `production.py`: Production-specific overrides
+
+Use `python-decouple` or `django-environ` for environment variable management.
+
+## Requirements Structure
+
+### base.txt
+Contains core dependencies:
+- Django
+- Django REST Framework
+- Database drivers
+- Core utilities
+
+### local.txt
+Includes base.txt plus:
+- Development tools (debug-toolbar, django-extensions)
+- Code quality tools (black, isort, flake8, pylint)
+- Testing frameworks (pytest, factory-boy)
+- Pre-commit hooks
+
+### production.txt
+Includes base.txt plus:
+- Production server (gunicorn)
+- Production optimizations
+- Monitoring tools (optional)
+
+## App Structure Best Practices
+
+### Standard App Files
+
+Each app should have:
+- `models.py`: Database models
+- `serializers.py`: DRF serializers for API
+- `services.py`: Business logic layer (separated from views)
+- `views.py`: API views/viewsets
+- `urls.py`: App-specific URL routing
+- `admin.py`: Django admin configuration
+- `tests.py`: Test cases
+- `apps.py`: App configuration
+
+### Service Layer Pattern
+
+**Why services.py?**
+- Separates business logic from views
+- Makes code more testable
+- Allows reuse of business logic
+- Keeps views thin and focused on HTTP handling
+
+**Example**:
+```python
+# services.py
+def create_event(title, description, start_date, end_date, user):
+    """Business logic for creating an event."""
+    # Validation, business rules, etc.
+    event = Event.objects.create(...)
+    return event
+
+# views.py
+class EventViewSet(viewsets.ModelViewSet):
+    def create(self, request):
+        # Use service layer
+        event = create_event(...)
+        return Response(EventSerializer(event).data)
+```
+
+## Logging Setup
+
+### Logging Configuration
+
+1. Create `core/logging.py` with JSON formatter for production
+2. Configure log handlers:
+   - File handler with rotation (store in `logs/` directory)
+   - Console handler for development
+   - Error file handler for errors
+3. Set log levels:
+   - DEBUG for local development
+   - INFO for staging
+   - WARNING/ERROR for production
+4. Add request logging middleware to log all API requests with timing, user, and status
+5. Configure query logging for slow queries in development
+
+### Logs Directory
+
+- Create `logs/` directory in project root
+- Add `logs/.gitkeep` to preserve directory in git
+- Add `logs/` to `.gitignore`
+- Configure log rotation (max file size, backup count)
+
+## Code Quality Tools Configuration
+
+### Black (Code Formatter)
+
+- Line length: 120 characters
+- Target Python versions: 3.10, 3.11, 3.12
+- Exclude migrations directory
+
+### isort (Import Sorter)
+
+- Profile: black (for compatibility)
+- Line length: 120
+- Skip migrations directory
+
+### Flake8 (Linter)
+
+- Max line length: 120
+- Extend ignore: E203, E266, E501, W503
+- Exclude migrations, venv, build directories
+
+### Pylint (Code Quality)
+
+- Ignore migrations
+- Max line length: 120
+- Configure for Django and DRF
+
+## Pre-commit Hooks Setup
+
+### Installation
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+### Configured Hooks
+
+1. **Trailing whitespace**: Remove trailing whitespace
+2. **End of file fixer**: Ensure files end with newline
+3. **YAML/JSON/TOML checkers**: Validate configuration files
+4. **Large file checker**: Prevent committing large files
+5. **Black**: Format code
+6. **isort**: Sort imports
+7. **Flake8**: Lint code
+8. **Pylint**: Code quality checks
+9. **Django check**: Run `python manage.py check`
+10. **Migrations check**: Ensure migrations are up to date
+11. **Commit message validation**: Validate commit message format
+
+## Git Workflow and Branching Strategy
+
+### Branching Strategy
+
+- **main/master**: Production-ready code
+- **develop**: Integration branch for features
+- **feature/<name>**: Feature development branches (from develop)
+- **bugfix/<name>**: Bug fix branches (from develop)
+- **hotfix/<name>**: Production hotfixes (from main)
+- **release/<version>**: Release preparation branches (from develop)
+
+### Commit Message Convention
+
+Format: `<type>(<scope>): <subject>`
+
+**Types:**
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, etc.)
+- `refactor`: Code refactoring
+- `test`: Test changes
+- `chore`: Build process or auxiliary tool changes
+- `perf`: Performance improvements
+- `ci`: CI configuration changes
+- `build`: Build system changes
+
+**Examples:**
+- `feat(calendar): add event creation endpoint`
+- `fix(users): resolve email validation issue`
+- `docs(readme): update installation instructions`
+
+## Docker Configuration
+
+### Dockerfile
+
+- Use multi-stage build for production
+- Python 3.11-slim base image
+- Non-root user for security
+- Health check configuration
+- Gunicorn for production server
+
+### docker-compose.yml
+
+Services:
+- **db**: PostgreSQL database
+- **redis**: Redis cache
+- **web**: Django application
+
+Configure volumes, environment variables, and health checks.
+
+### .dockerignore
+
+Exclude:
+- Git files
+- Virtual environments
+- IDE files
+- Logs
+- Static/media files (will be generated)
+- Documentation
+- CI/CD files
+
+## CI/CD Pipeline Setup
+
+### GitHub Actions
+
+Stages:
+1. **Lint**: Run Black, isort, Flake8, Pylint
+2. **Test**: Run pytest with coverage
+3. **Build**: Build Docker image
+
+Configure for:
+- Push to main/develop branches
+- Pull requests to main/develop branches
+
+## Database Setup
+
+### PostgreSQL Configuration
+
+- Use PostgreSQL 12+ for production
+- Configure connection pooling
+- Set up read replicas if needed
+- Configure database backups
+
+### Migration Management
+
+- Always create migrations for model changes
+- Review migrations before committing
+- Test migrations on staging before production
+- Use `--check` flag to ensure migrations are up to date
+
+## App Registration
+
+After creating an app, register it in `config/settings/base.py`:
+
+```python
+INSTALLED_APPS = [
+    # ... other apps
+    "core",
+    "calendar",  # Add your app here
+]
+```
+
+## Health Check Endpoints
+
+Create health check endpoints:
+- `/health/`: Basic health check
+- `/ready/`: Readiness check (database, cache connectivity)
+
+## Documentation
+
+### README.md
+
+Include:
+- Project overview
+- Features
+- Quick start guide
+- Development instructions
+- API documentation links
+- Docker instructions
+- Environment variables
+
+### CONTRIBUTING.md
+
+Include:
+- Git workflow
+- Commit message conventions
+- Code review checklist
+- Development setup instructions
+
+## Security Configuration
+
+### Initial Security Setup
+
+1. Generate strong SECRET_KEY
+2. Configure ALLOWED_HOSTS
+3. Set up CORS properly
+4. Configure security headers
+5. Set up rate limiting
+6. Configure password validation
+7. Set up HTTPS in production
+8. Configure session security
+
+## Next Steps After Setup
+
+1. Create Django apps following the structure
+2. Register apps in `INSTALLED_APPS`
+3. Set up authentication endpoints
+4. Create initial models in `models.py`
+5. Create services in `services.py` for business logic
+6. Set up API endpoints in `views.py` and `urls.py`
+7. Write tests in `tests.py`
+8. Configure API documentation
+9. Set up monitoring and logging
+10. Deploy to staging environment

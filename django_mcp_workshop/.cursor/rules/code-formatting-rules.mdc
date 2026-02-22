@@ -1,0 +1,198 @@
+---
+alwaysApply: true
+description: "Mandatory code formatting rules using Black, isort, and flake8 with 120 character line length and pre-commit hook integration"
+---
+
+# Code Formatting Rules
+
+You are an expert in Python code formatting. This document contains mandatory formatting rules for all Python code in this project.
+
+## Black Code Formatter - MANDATORY
+
+### Formatting Requirements
+
+- **ALL Python files MUST be formatted with Black** before being written or saved
+- **Line length**: 120 characters (as configured in `pyproject.toml`)
+- **Target Python versions**: py310, py311, py312
+- **Configuration**: Black settings are defined in `[tool.black]` section of `pyproject.toml`
+
+### When Formatting is Required
+
+1. **Before writing any Python code**: Always format code with Black before saving files
+2. **After generating new code**: Run `black .` or format the specific file after generating new Python code
+3. **After modifying existing code**: Ensure modified code follows Black formatting rules
+4. **Before committing**: All code must pass `black --check .` validation
+
+### Black Configuration Reference
+
+The project uses the following Black configuration (from `pyproject.toml`):
+
+```toml
+[tool.black]
+line-length = 120
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | migrations
+)/
+'''
+```
+
+### Important Notes
+
+- **Unformatted code will fail CI checks**: The GitHub Actions workflow runs `black --check .` which will fail if any files are not properly formatted
+- **Pre-commit hooks**: Pre-commit hooks are configured to automatically format code before commits (see `.pre-commit-config.yaml`)
+- **No exceptions**: There are no exceptions to Black formatting rules - all Python code must be formatted
+
+### Commands
+
+- Format all files: `black .` or `python3 -m black .`
+- Check formatting: `black --check .` or `python3 -m black --check .`
+- Format specific file: `black path/to/file.py`
+
+### isort Import Sorter - MANDATORY
+
+#### Import Sorting Requirements
+
+- **ALL Python files MUST have correctly sorted imports** as verified by isort
+- **isort** is configured to work with Black (profile: black)
+- Import sorting is handled automatically by isort with Black-compatible settings
+- Both tools run automatically via pre-commit hooks
+
+#### When Import Sorting is Required
+
+1. **Before writing any Python code**: Always ensure imports are correctly sorted
+2. **After generating new code**: Run `isort .` or sort imports for the specific file after generating new Python code
+3. **After modifying existing code**: Ensure modified code has correctly sorted imports
+4. **Before committing**: All code must pass `isort --check-only .` validation
+
+#### isort Configuration Reference
+
+The project uses isort with Black-compatible settings (profile: black) as configured in `pyproject.toml`.
+
+#### Important Notes
+
+- **Unsorted imports will fail CI checks**: The GitHub Actions workflow runs `isort --check-only .` which will fail if any files have incorrectly sorted imports
+- **Pre-commit hooks**: Pre-commit hooks are configured to automatically sort imports before commits (see `.pre-commit-config.yaml`)
+- **No exceptions**: There are no exceptions to isort import sorting rules - all Python imports must be correctly sorted
+
+#### Commands
+
+- Sort imports in all files: `isort .` or `python3 -m isort .`
+- Check import sorting: `isort --check-only .` or `python3 -m isort --check-only .`
+- Sort imports in specific file: `isort path/to/file.py`
+
+#### Integration with Black
+
+- **isort** is configured to work with Black (profile: black)
+- Import sorting is handled automatically by isort with Black-compatible settings
+- Both tools run automatically via pre-commit hooks
+
+### Flake8 Linter - MANDATORY
+
+#### Linting Requirements
+
+- **ALL Python files MUST pass flake8 linting** before being committed
+- **flake8** is configured with max line length of 120 characters (matching Black)
+- Linting runs automatically via pre-commit hooks and CI checks
+- Configuration is defined in `.flake8` file
+
+#### When Linting is Required
+
+1. **Before writing any Python code**: Ensure code follows flake8 rules
+2. **After generating new code**: Run `flake8 .` to check for linting errors
+3. **After modifying existing code**: Verify modified code passes flake8 checks
+4. **Before committing**: All code must pass `flake8 .` validation
+
+#### Flake8 Configuration Reference
+
+The project uses the following flake8 configuration (from `.flake8`):
+
+```ini
+[flake8]
+max-line-length = 120
+extend-ignore = E203, E266, E501, W503, F403, F405
+exclude = .git,__pycache__,.venv,venv,env,ENV,build,dist,migrations,*.egg-info,.mypy_cache,.pytest_cache,.tox,.nox
+max-complexity = 15
+per-file-ignores =
+    __init__.py:F401
+    calendars/services.py:C901
+```
+
+#### Important Notes
+
+- **Linting errors will fail CI checks**: The GitHub Actions workflow runs `flake8 .` which will fail if any files have linting errors
+- **Pre-commit hooks**: Pre-commit hooks are configured to automatically check linting before commits (see `.pre-commit-config.yaml`)
+- **No exceptions**: There are no exceptions to flake8 linting rules - all Python code must pass linting
+- **Common errors to fix**:
+  - F401: Imported but unused (remove unused imports)
+  - E501: Line too long (should be handled by Black, but check if needed)
+  - F403/F405: Star imports (avoid unless necessary)
+
+#### Commands
+
+- Check all files: `flake8 .` or `python3 -m flake8 .`
+- Check specific file: `flake8 path/to/file.py`
+- Check with specific error codes: `flake8 --select=E,F,W path/to/file.py`
+
+#### Integration with Black and isort
+
+- **flake8** works alongside Black and isort
+- Black handles formatting, isort handles imports, flake8 handles code quality
+- All three tools run automatically via pre-commit hooks
+- Line length is consistent across all tools (120 characters)
+
+### AI Assistant Instructions
+
+When generating or editing Python code:
+
+1. **Always format code** according to Black rules (line-length: 120)
+2. **Always ensure imports are sorted** according to isort rules
+3. **Always ensure code passes flake8 linting** (no unused imports, proper code quality)
+4. **Run `black .`** after generating or modifying Python files
+5. **Run `isort .`** after generating or modifying Python files to sort imports
+6. **Run `flake8 .`** after generating or modifying Python files to check for linting errors
+7. **Verify formatting** by running `black --check .` before considering the task complete
+8. **Verify import sorting** by running `isort --check-only .` before considering the task complete
+9. **Verify linting** by running `flake8 .` before considering the task complete
+10. **Reference** the `pyproject.toml` and `.flake8` configuration for exact rules
+11. **Never commit** unformatted code, unsorted imports, or code with linting errors - it will fail CI checks
+
+### Troubleshooting
+
+If formatting fails:
+1. Check that Black is installed: `pip install black` or use `requirements/local.txt`
+2. Verify Black version matches project requirements (>=23.10.0,<24.0.0)
+3. Run `black .` manually to format all files
+4. Ensure pre-commit hooks are installed: `pre-commit install`
+
+If import sorting fails:
+1. Check that isort is installed: `pip install isort` or use `requirements/local.txt`
+2. Verify isort version matches project requirements
+3. Run `isort .` manually to sort imports in all files
+4. Run `isort --check-only .` to verify all imports are correctly sorted
+5. Ensure pre-commit hooks are installed: `pre-commit install`
+
+If linting fails:
+1. Check that flake8 is installed: `pip install flake8` or use `requirements/local.txt`
+2. Verify flake8 version matches project requirements
+3. Run `flake8 .` to identify all linting errors
+4. Fix common issues:
+   - Remove unused imports (F401)
+   - Fix line length issues (E501) - usually handled by Black
+   - Remove unused variables
+   - Fix code complexity if needed
+5. Check `.flake8` configuration for per-file ignores if needed
+6. Ensure pre-commit hooks are installed: `pre-commit install`

@@ -1,0 +1,104 @@
+---
+alwaysApply: true
+description: "Standard, framework-agnostic REST API response guidelines"
+---
+
+# API Response Rules
+
+## Purpose
+
+Give every REST endpoint a **simple, consistent JSON shape** for both success and error responses, regardless of language or framework.
+
+## Core Principles
+
+- Use a **single top-level format** for all responses (success and error)
+- Always include a **numeric status** and **human-readable message**
+- Wrap returned data inside a **`data`** field (or `null` when there is no payload)
+- Use **structured error details** and **machine-readable error codes**
+- Choose **correct HTTP status codes** that match the situation
+
+## Recommended Shapes
+
+**Success (example):
+
+```json
+{
+  "status": 200,
+  "message": "OK",
+  "data": {
+    "items": []
+  }
+}
+```
+
+**Error (example):
+
+```json
+{
+  "status": 400,
+  "message": "Validation failed",
+  "errors": {
+    "field_name": ["Must not be empty"]
+  },
+  "error_code": "VALIDATION_ERROR"
+}
+```
+
+You can adjust field names if needed, but keep the **shape consistent** across the API.
+
+## Simple Example (pseudo-code)
+
+```python
+# Framework-agnostic pseudo-code
+class APIResponse:
+    @staticmethod
+    def success(data=None, message: str = "OK", status_code: int = 200) -> dict:
+        return {"status": status_code, "message": message, "data": data}
+
+    @staticmethod
+    def error(
+        message: str = "Error",
+        *,
+        errors: dict | None = None,
+        error_code: str | None = None,
+        status_code: int = 400,
+    ) -> dict:
+        body: dict[str, object] = {"status": status_code, "message": message}
+        if errors is not None:
+            body["errors"] = errors
+        if error_code is not None:
+            body["error_code"] = error_code
+        return body
+```
+
+Use a helper like this in **all** endpoints so the format never drifts.
+
+## Do / Don't
+
+### Do
+
+- **Do** return the same top-level keys from every endpoint
+- **Do** use `status` for the HTTP status code (e.g. `200`, `404`)
+- **Do** keep `message` short, clear, and user-facing
+- **Do** include `errors` only when there are field-level or detailed issues
+- **Do** use specific `error_code` values (e.g. `USER_NOT_FOUND`, `INVALID_TOKEN`)
+
+### Don't
+
+- **Don't** mix several different response formats in one API
+- **Don't** leak internal exception text or stack traces to clients
+- **Don't** use vague messages like "Error" without context
+- **Don't** overload HTTP 200 for failures; use proper 4xx/5xx codes instead
+
+## Common HTTP Status Codes
+
+- **200 OK** – successful read/update
+- **201 Created** – resource successfully created
+- **204 No Content** – success with no body
+- **400 Bad Request** – malformed or invalid request
+- **401 Unauthorized** – authentication required or invalid
+- **403 Forbidden** – authenticated, but not allowed
+- **404 Not Found** – resource does not exist
+- **409 Conflict** – conflicting state (e.g. duplicate)
+- **422 Unprocessable Entity** – validation failed with details
+- **500 Internal Server Error** – unexpected server-side error

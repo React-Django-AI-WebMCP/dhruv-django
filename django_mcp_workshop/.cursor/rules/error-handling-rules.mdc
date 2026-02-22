@@ -1,0 +1,91 @@
+---
+alwaysApply: true
+description: "Exception handling patterns, custom exceptions, and error code standardization for Python applications"
+---
+
+# Error Handling Rules
+
+## Purpose
+
+Provide simple, consistent patterns for raising, handling, and logging errors in any Python backend, with a small, standard set of error codes.
+
+## Core Principles
+
+- Use **custom exception types** instead of bare `Exception`
+- Separate **internal error details** (logs) from **external messages** (responses)
+- Use **stable, machine-readable error codes** alongside human-readable messages
+- Centralize error-to-response mapping where possible
+- Always **log unexpected errors** with context and stack traces
+
+## Simple Patterns
+
+### Custom Base Error
+
+```python
+class APIError(Exception):
+    """Base exception for API errors."""
+
+    def __init__(self, message: str, *, error_code: str = "API_ERROR", status_code: int = 400) -> None:
+        self.message = message
+        self.error_code = error_code
+        self.status_code = status_code
+        super().__init__(message)
+
+
+class NotFoundError(APIError):
+    def __init__(self, message: str = "Resource not found") -> None:
+        super().__init__(message, error_code="NOT_FOUND", status_code=404)
+```
+
+### Try/Except with Logging
+
+```python
+def handle_request() -> dict:
+    try:
+        result = do_something_risky()
+        return APIResponse.success(data=result)
+    except APIError as e:
+        # Known, expected error
+        logger.warning("Handled API error", extra={"code": e.error_code}, exc_info=True)
+        return APIResponse.error(message=e.message, error_code=e.error_code, status_code=e.status_code)
+    except Exception:
+        # Unexpected error
+        logger.exception("Unexpected error")
+        return APIResponse.error(
+            message="An internal error occurred",
+            error_code="INTERNAL_ERROR",
+            status_code=500,
+        )
+```
+
+## Recommended Error Codes
+
+Use short, descriptive, **UPPER_SNAKE_CASE** error codes:
+
+- `VALIDATION_ERROR` – Request failed validation
+- `BAD_REQUEST` – Malformed or invalid request
+- `UNAUTHORIZED` – Missing or invalid authentication
+- `FORBIDDEN` – Authenticated but not allowed
+- `NOT_FOUND` – Resource does not exist
+- `CONFLICT` – Conflicting state (duplicate, version conflict)
+- `INTERNAL_ERROR` – Unexpected server-side error
+
+You can add domain-specific codes (e.g. `USER_NOT_FOUND`, `PROJECT_INACTIVE`) following the same style.
+
+## Do / Don't
+
+### Do
+
+- **Do** define a small hierarchy of custom exception classes
+- **Do** include `error_code` and HTTP `status_code` on your error types
+- **Do** log unexpected errors with stack traces and useful context
+- **Do** show safe, user-friendly messages to clients
+- **Do** reuse the same error codes across the whole API
+
+### Don't
+
+- **Don't** raise bare `Exception` without context
+- **Don't** expose raw stack traces or SQL errors in API responses
+- **Don't** invent a new error shape per endpoint
+- **Don't** use extremely generic codes like `ERROR` everywhere
+- **Don't** swallow exceptions silently (always log or handle explicitly)

@@ -1,0 +1,65 @@
+---
+description: "RESTful URL routing patterns and organization guidelines for Django/DRF projects with URL parameter validation"
+---
+
+# URL Routing Rules
+
+## Purpose
+
+Provide **simple, REST-friendly URL design guidelines** that work across web frameworks, with optional Django/DRF examples.
+
+## Core Principles
+
+- URLs should represent **resources (nouns)**, not actions (verbs)
+- Use **plural nouns** for collections (e.g. `/users/`, `/projects/`)
+- Use **HTTP methods** (GET, POST, PUT, PATCH, DELETE) to express actions
+- Use **path parameters** for resource identity, **query parameters** for filtering/sorting
+- Keep URL patterns **consistent and predictable** across the API
+
+## Basic RESTful Shapes
+
+```text
+GET    /users/          # List users
+POST   /users/          # Create user
+GET    /users/{id}/     # Get single user
+PATCH  /users/{id}/     # Update part of user
+DELETE /users/{id}/     # Delete user
+
+GET    /users/{id}/posts/   # Nested: posts for a user
+```
+
+## Simple Example (Django/DRF)
+
+```python
+# urls.py (example)
+from rest_framework.routers import DefaultRouter
+from .views import UserViewSet
+
+router = DefaultRouter()
+router.register("users", UserViewSet, basename="user")
+
+urlpatterns = router.urls
+```
+
+## Do / Don't
+
+### Do
+
+- **Do** use plurals: `/users/`, `/tasks/`, `/projects/`
+- **Do** keep URL segments lowercase and hyphen-separated if needed (e.g. `/user-profiles/`)
+- **Do** validate path parameters (IDs, dates) at the boundary of your API
+- **Do** version your API when necessary (e.g. `/api/v1/users/`)
+
+### Don't
+
+- **Don't** put verbs in URLs like `/getUsers/` or `/deleteUser/`
+- **Don't** mix inconsistent patterns (e.g. `/user/` and `/users/` for same resource)
+- **Don't** encode resource identity only in query parameters (avoid `/users?id=123` when `/users/123/` fits)
+- **Don't** create deeply nested URLs beyond 2–3 levels
+
+## Versioning (High-Level)
+
+- Prefer **URL-based versions** (`/api/v1/...`, `/api/v2/...`) or header-based versioning
+- Keep old versions stable while evolving new ones
+
+These guidelines are framework-agnostic; adapt the routing syntax to your framework, but keep the **RESTful shapes and naming** consistent.

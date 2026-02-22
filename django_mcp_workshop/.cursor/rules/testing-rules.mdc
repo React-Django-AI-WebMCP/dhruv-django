@@ -1,0 +1,83 @@
+---
+alwaysApply: true
+description: "Comprehensive testing guidelines for pytest-based projects with factory-boy patterns, fixtures, and test organization"
+---
+
+# Testing Rules
+
+## Purpose
+
+Give a **lightweight, framework-neutral checklist** for writing good tests with pytest (and similar frameworks) that are clear, isolated, and easy to maintain.
+
+## Core Principles
+
+- Structure tests as **Arrange → Act → Assert (AAA)**
+- Use **descriptive names** that explain behavior and expectation
+- Keep tests **independent** and **idempotent** (order should not matter)
+- Use **fixtures and factories** instead of hand-built objects everywhere
+- Mock or fake **external dependencies** (APIs, files, queues)
+- Configure **coverage thresholds** in your test tool config (e.g. `pyproject.toml`), not in these rules
+
+## Simple Example
+
+```python
+# tests/test_add_item.py
+
+def test_add_item_increases_count(shopping_cart_factory) -> None:
+    # Arrange
+    cart = shopping_cart_factory(items=["apple"])
+
+    # Act
+    cart.add("banana")
+
+    # Assert
+    assert len(cart.items) == 2
+    assert "banana" in cart.items
+```
+
+## Fixtures and Factories
+
+- Use **fixtures** for shared setup (e.g. `db`, `client`, `settings`)
+- Use **factories** (e.g. factory-boy, custom helpers) for creating model/DTO instances
+- Prefer **small, composable fixtures** over one giant "kitchen sink" fixture
+
+Example (generic):
+
+```python
+import pytest
+
+@pytest.fixture
+def api_client() -> APIClient:
+    return APIClient()
+
+@pytest.fixture
+def user_factory() -> Callable[..., User]:
+    def _create_user(**overrides: object) -> User:
+        data = {"name": "test", "email": "test@example.com"}
+        data.update(overrides)
+        return User(**data)
+    return _create_user
+```
+
+## Do / Don't
+
+### Do
+
+- **Do** name tests like `test_<behavior>_<expected_result>`
+- **Do** keep one **clear expectation** per test where possible
+- **Do** use fixtures/factories to remove duplication
+- **Do** test both **success** and **failure** paths
+- **Do** configure coverage thresholds in your test config (e.g. `pyproject.toml`)
+
+### Don't
+
+- **Don't** rely on test execution order or shared global state
+- **Don't** hit real external services (APIs, DBs) when a mock or in-memory store is enough
+- **Don't** duplicate the same setup code across many tests
+- **Don't** assert on irrelevant implementation details (test behavior, not internals)
+
+## Coverage (High-Level)
+
+- Aim for **high coverage on critical business logic**, but prioritize **meaningful tests** over hitting a number
+- Configure coverage thresholds (e.g. `fail_under`) in your test tool configuration
+- Use coverage reports to find **untested branches and edge cases**
