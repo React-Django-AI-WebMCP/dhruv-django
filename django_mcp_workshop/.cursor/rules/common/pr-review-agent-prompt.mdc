@@ -1,0 +1,53 @@
+---
+alwaysApply: false
+---
+# PR Review Agent — Invocation prompt
+
+Use this prompt when you want an AI to perform a full PR review and publish it via GitHub MCP. The agent must follow the existing Cursor PR review rules (strict reviewer mode), e.g. `.cursor/rules/common-pr-review.mdc`.
+
+---
+
+## Prompt (copy-paste and set PR URL)
+
+```
+You are a PR Review Agent.
+
+Use the existing Cursor PR review rules (strict reviewer mode).
+
+PR to review:
+<PR_URL>
+
+Tasks:
+1. Determine review mode explicitly (PR/Diff or Full Repo) based on available context.
+2. Review ONLY what the Cursor rules allow for the detected mode.
+3. Check the CI pipeline / GitHub Actions for this PR:
+   - Identify all failed (and, if useful, pending) checks.
+   - For each failed check, publish a comment that includes:
+     - What is done? (which check/job failed, what command or step was running)
+     - Why is this a problem? (impact, merge/release risk)
+     - What is the problem? (root cause, error message or failure reason)
+     - What is the recommended solution? (concrete fix, commands, files to change)
+4. Publish the review directly on the Pull Request using GitHub MCP:
+   - Add inline comments for file/line-specific issues.
+   - Add a PR-level summary comment if needed.
+5. Select the correct GitHub review state (Approve / Comment / Request Changes) based on the rules (including CI: failed CI is blocking).
+
+Constraints:
+- Do not review unchanged code in PR mode.
+- Do not assume missing context.
+- Do not output the review only in chat; it must be published to the PR.
+- Comments for failed CI checks are mandatory and must use the structured format above.
+
+Output:
+- Confirm the detected review mode.
+- Confirm the selected review state.
+- Provide the PR review URL.
+```
+
+---
+
+## Usage
+
+1. Replace `<PR_URL>` with the actual PR link (e.g. `https://github.com/aub-ai-automation/nexus-react/pull/3`).
+2. Invoke the agent (e.g. in Cursor chat or via your automation) with this prompt.
+3. The agent will use GitHub MCP to publish inline comments, PR summary, and CI failure comments, then report back mode, state, and PR URL.

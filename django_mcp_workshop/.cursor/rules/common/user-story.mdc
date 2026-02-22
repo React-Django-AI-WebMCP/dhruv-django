@@ -1,0 +1,24 @@
+### Story: <Concise action-based title>
+
+As a **<user role>**,
+I want **<visible interaction>**,
+so that **<user benefit>**.
+
+**Design Reference**
+- Screen: <screen name>
+- Interaction: <interaction>
+
+**Acceptance Criteria**
+- Given <context>, when <action>, then <result>
+- Visual state matches design (including all UI elements from Epic/UI Map, even if non-functional)
+- NEEDS CLARIFICATION: <edge case or rule>
+
+**Visual Structure Reference**
+- Epic specifies: <list key visual elements from Epic>
+- UI Map specifies: <list key visual elements from UI Map>
+- **Note**: Visual elements should be present even if functionality is in another story (mark as disabled/display-only)
+
+**Definition of Done**
+- UI matches Figma
+- Interaction works as described
+- No unresolved assumptions

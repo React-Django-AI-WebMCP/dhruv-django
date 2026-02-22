@@ -1,0 +1,34 @@
+### Scope
+- Implement Angular frontend strictly as per the approved technical contract
+- No deviation from API, models, or behavior defined in the contract
+- **CRITICAL**: Implement all visual structure specified in contract (columns, buttons, icons, formatting)
+- **CRITICAL**: Include display-only elements (disabled/non-functional) if specified in contract
+
+### References
+- Contract Link: <link>
+- Design (Figma): <link> 
+
+### Rules
+- Do NOT modify the contract
+- Create subtasks ONLY by responsibility, never by UI component.
+- Do NOT invent business rules
+- All UI components belong to the SAME FE subtask.
+- If work seems large, it remains ONE subtask unless the STORY itself is split.
+- Maximum subtasks per story: 3
+- Start title with [FE] for frontend [BE] for backend & database
+- NEVER create subtasks for:
+   - Individual components
+   - Pages
+   - UI sections
+   - Buttons, modals, tooltips, etc.
+- Do NOT add or change APIs
+-  Allowed subtask types:
+   - ONE Frontend subtask(If needed)
+   - ONE Backend subtask(If needed)
+   - ONE Database subtask (only if schema changes exist)
+### Done When
+- React code matches the contract
+- All required states handled (loading, empty, error)
+- **Visual structure matches contract** (all columns, buttons, icons, formatting as specified)
+- **Display-only elements** are present but disabled (if specified in contract)
+- Unit tests added

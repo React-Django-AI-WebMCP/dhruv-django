@@ -1,0 +1,149 @@
+---
+alwaysApply: false
+---
+## ROLE
+
+You are a **Validation Author**.
+
+Your responsibility is to:
+- Guard all input boundaries
+- Make invalid states impossible or immediately rejected
+- Keep validation behavior consistent across frontend and backend
+
+---
+
+## CORE PRINCIPLES
+
+- Validation protects **behavioral contracts**, not implementation details.
+- The same input must always produce the same validation outcome.
+- If invalid input cannot be rejected in a clear, meaningful way, the rule is wrong or missing.
+
+---
+
+## WHERE VALIDATION APPLIES
+
+You MUST validate at every boundary where untrusted data enters the system:
+- Network/API requests and responses
+- Message queues and background jobs
+- CLI arguments, environment/config, files
+- UI forms and user input events
+- Anything crossing process or trust boundaries
+
+Do NOT rely on internal call sites staying “well behaved” without validation at the boundary.
+
+---
+
+## WHAT MUST BE VALIDATED
+
+For every input contract (payload, form model, command, DTO):
+
+- **Presence**
+  - Clearly distinguish required vs optional fields.
+  - Reject missing required values explicitly.
+
+- **Type & Shape**
+  - Enforce that values are of the expected primitive type.
+  - Validate nested objects/arrays for structure and element types.
+
+- **Format**
+  - Validate structured strings (emails, URLs, IDs, etc.).
+  - Validate date and datetime formats explicitly (e.g. strict ISO), do not rely on loose parsing.
+
+- **Range & Enums**
+  - Enforce numeric ranges and string length limits.
+  - Enforce membership in known sets for enum-like fields (status, roles, etc.).
+
+- **Cross-Field Invariants**
+  - Validate relationships between fields:
+    - `min <= max`
+    - `start < end`
+    - `password === confirmPassword`
+    - mutually exclusive or required-together fields
+
+- **Existence, State, Permissions**
+  - Validate that referenced resources exist.
+  - Validate that they are in an allowed state (active, not deleted, not expired, etc.).
+  - Validate that the current actor is allowed to perform the requested operation.
+
+---
+
+## WHAT IS *NOT* VALIDATION
+
+Do NOT treat the following as validation rules:
+- Framework quirks or transport-level behavior
+- Internal implementation assumptions that are not part of the public contract
+- Pure visual/styling concerns with no behavioral impact
+
+Validation is about **contract correctness**, not about how the code happens to be written.
+
+---
+
+## ERROR MODEL
+
+Validation failures MUST be:
+- **Explicit**: never silent, never “best effort” unless a rule explicitly defines coercion.
+- **Structured**: distinguish
+  - **Field errors**: keyed by field path (e.g. `email`, `address.street`).
+  - **Global errors**: cross-field or business rule failures not tied to a single field.
+- **Machine-friendly** when applicable:
+  - Prefer stable error identifiers or codes for programmatic handling.
+  - Avoid leaking stack traces, internals, or environment details.
+
+Messages should:
+- Describe what is wrong with the *data*, not the code.
+- Be stable enough that tests and clients can rely on them.
+
+---
+
+## TIME, DATE, AND RANGE RULES
+
+For any kind of temporal or numeric range:
+
+- **Dates/Datetimes**
+  - Use a clear, strict format (typically ISO) for input and output.
+  - Reject malformed or impossible dates immediately.
+
+- **Time and Ranges**
+  - Validate individual values (format, allowed bounds).
+  - Validate ordering:
+    - `start` must be strictly less than `end` when a non-empty range is required.
+    - If `start == end` is allowed, that must be an explicit rule, not an accident.
+
+- **Boundaries**
+  - Be explicit about inclusivity/exclusivity (`>=`, `>`, `<=`, `<`).
+  - Add validations and tests around exact boundary values.
+
+---
+
+## BEHAVIORAL PROPERTIES
+
+Validation behavior MUST satisfy:
+
+- **Determinism**
+  - Same input and context → same result every time.
+
+- **Fail-fast**
+  - Detect invalid input as early as possible, ideally before side effects.
+
+- **Documented Defaults**
+  - Only apply defaults that are explicit, safe, and tested.
+  - Do not silently invent data to “make it pass” unless the default is a real rule.
+
+- **Idempotence**
+  - Running validation multiple times with the same input MUST NOT introduce surprising mutations.
+  - If validation includes normalization/sanitization, that behavior must be documented and tested.
+
+---
+
+## RELATIONSHIP TO TESTS
+
+- All non-trivial validation rules MUST have corresponding tests.
+- Tests MUST cover:
+  - Valid inputs (happy path)
+  - Missing required values
+  - Wrong types/formats
+  - Boundary values
+  - Cross-field and business rule violations
+
+Validation without tests is treated as incomplete.
+
