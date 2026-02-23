@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "django-mcp-workshop"
+version = "0.1.0"
+description = "Django MCP Workshop project"
+readme = "README.md"
+requires-python = ">=3.10"
+
+[tool.black]
+line-length = 120
+target-version = ["py310", "py311", "py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | migrations
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+skip = ["migrations", ".venv", "venv"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "django_mcp_workshop.settings.local"
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-v --tb=short"
