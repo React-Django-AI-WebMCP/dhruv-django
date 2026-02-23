@@ -23,22 +23,24 @@ This document strictly reflects the above Figma source. Any behavior or UI not v
 
 ### 2.2 Core User Actions
 
-| User action | System response (user-visible) |
-|-------------|--------------------------------|
-| Click "New Time Log" | Modal "New Time Log" opens with fields: Date, Project, Task, Time Spent (00:00), Description, Billable; Cancel and Save. |
-| Click Save in New Time Log | Modal closes; new entry appears in list/calendar (assumed). **NEED CLARIFICATION:** Exact outcome and where it appears. |
-| Click Cancel in New Time Log | Modal closes; no new entry. |
-| Open "Edit Time Log" | Modal "Edit Time Log" opens with same fields pre-filled; Cancel and Save. |
-| Save in Edit Time Log | Modal closes; updated entry reflected (assumed). **NEED CLARIFICATION:** Exact outcome. |
-| Open date field (Time Log or Event) | Date picker opens (e.g. February 2024 grid); user can select date; "Select Date" or "Apply" (or equivalent) applies choice. |
-| Add event (e.g. "+" on calendar) | Event creation modal opens: Event Name, Start Date, End Date, Start Time, End Time, Description, All Day; Cancel and Save. |
-| Save event | Modal closes; event appears on calendar (assumed). **NEED CLARIFICATION:** Exact outcome. |
-| Filter by project | Dropdown (e.g. "All Projects", "Project A", "Project B"); selection changes which events/entries are shown on calendar. |
-| Search/filter (Calendar Query) | "Search Events", "Filter by Project", "Filter by Category" bar; applying filters changes displayed events; list view can show Event Name, Project, Category, Date, Time. **NEED CLARIFICATION:** Exact behavior of search vs filter and list view visibility. |
-| Drag entry card to another column | Card moves from source column to target column; columns may highlight as drop targets during drag. **NEED CLARIFICATION:** Whether this changes "status" or only reorders; any confirmation. |
-| Add entry to column | "+" at bottom of column (shown in design). **NEED CLARIFICATION:** Whether this creates a new entry or adds existing one. |
-| Confirm deletion | "Confirm Deletion" dialog: "Are you sure you want to delete this item?" with confirm/cancel. **NEED CLARIFICATION:** What is deleted (time log, event, or task card) and from where it's triggered. |
-| Empty state | "No items found." with "Add New" button. **NEED CLARIFICATION:** Which screen(s) show this and what "Add New" does. |
+
+| User action                         | System response (user-visible)                                                                                                                                                                                                                                |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Click "New Time Log"                | Modal "New Time Log" opens with fields: Date, Project, Task, Time Spent (00:00), Description, Billable; Cancel and Save.                                                                                                                                      |
+| Click Save in New Time Log          | Modal closes; new entry appears in list/calendar (assumed). **NEED CLARIFICATION:** Exact outcome and where it appears.                                                                                                                                       |
+| Click Cancel in New Time Log        | Modal closes; no new entry.                                                                                                                                                                                                                                   |
+| Open "Edit Time Log"                | Modal "Edit Time Log" opens with same fields pre-filled; Cancel and Save.                                                                                                                                                                                     |
+| Save in Edit Time Log               | Modal closes; updated entry reflected (assumed). **NEED CLARIFICATION:** Exact outcome.                                                                                                                                                                       |
+| Open date field (Time Log or Event) | Date picker opens (e.g. February 2024 grid); user can select date; "Select Date" or "Apply" (or equivalent) applies choice.                                                                                                                                   |
+| Add event (e.g. "+" on calendar)    | Event creation modal opens: Event Name, Start Date, End Date, Start Time, End Time, Description, All Day; Cancel and Save.                                                                                                                                    |
+| Save event                          | Modal closes; event appears on calendar (assumed). **NEED CLARIFICATION:** Exact outcome.                                                                                                                                                                     |
+| Filter by project                   | Dropdown (e.g. "All Projects", "Project A", "Project B"); selection changes which events/entries are shown on calendar.                                                                                                                                       |
+| Search/filter (Calendar Query)      | "Search Events", "Filter by Project", "Filter by Category" bar; applying filters changes displayed events; list view can show Event Name, Project, Category, Date, Time. **NEED CLARIFICATION:** Exact behavior of search vs filter and list view visibility. |
+| Drag entry card to another column   | Card moves from source column to target column; columns may highlight as drop targets during drag. **NEED CLARIFICATION:** Whether this changes "status" or only reorders; any confirmation.                                                                  |
+| Add entry to column                 | "+" at bottom of column (shown in design). **NEED CLARIFICATION:** Whether this creates a new entry or adds existing one.                                                                                                                                     |
+| Confirm deletion                    | "Confirm Deletion" dialog: "Are you sure you want to delete this item?" with confirm/cancel. **NEED CLARIFICATION:** What is deleted (time log, event, or task card) and from where it's triggered.                                                           |
+| Empty state                         | "No items found." with "Add New" button. **NEED CLARIFICATION:** Which screen(s) show this and what "Add New" does.                                                                                                                                           |
+
 
 ### 2.3 Ownership Rules
 
@@ -148,3 +150,4 @@ It explicitly excludes:
 - Data storage
 - Validation rules
 - Technical architecture
+
